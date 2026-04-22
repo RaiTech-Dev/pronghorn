@@ -42,8 +42,8 @@ export function ShareArtifactDialog({
     setIsPublished(artifact.is_published || false);
   }, [artifact.id, artifact.is_published]);
 
-  const baseUrl = "https://pronghorn.red";
-  const apiBaseUrl = "https://api.pronghorn.red/functions/v1/serve-artifact";
+  const baseUrl = import.meta.env.VITE_APP_URL ?? window.location.origin;
+  const apiBaseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/serve-artifact`;
   const viewerUrl = `${baseUrl}/viewer/${artifact.id}`;
   const rawUrl = `${apiBaseUrl}?id=${artifact.id}&mode=raw`;
   const binaryUrl = `${apiBaseUrl}?id=${artifact.id}&mode=binary`;

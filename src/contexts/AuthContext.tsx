@@ -98,27 +98,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'https://pronghorn.red/dashboard',
-        skipBrowserRedirect: false,
-      }
-    });
-    return { error };
-  };
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${import.meta.env.VITE_APP_URL ?? window.location.origin}/dashboard`,
+      skipBrowserRedirect: false,
+    }
+  });
+  return { error };
+};
 
-  const signInWithAzure = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'azure',
-      options: {
-        redirectTo: 'https://pronghorn.red/dashboard',
-        scopes: 'openid profile email',
-        skipBrowserRedirect: false,
-      }
-    });
-    return { error };
-  };
+const signInWithAzure = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'azure',
+    options: {
+      redirectTo: `${import.meta.env.VITE_APP_URL ?? window.location.origin}/dashboard`,
+      scopes: 'openid profile email',
+      skipBrowserRedirect: false,
+    }
+  });
+  return { error };
+};
 
   const signOut = async () => {
     try {

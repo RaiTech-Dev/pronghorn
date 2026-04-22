@@ -627,7 +627,7 @@ export function ArtifactCollaborator({
     
     abortControllerRef.current = new AbortController();
     
-    const orchestratorUrl = `${import.meta.env.VITE_SUPABASE_URL || 'https://obkzdksfayygnrzdqoam.supabase.co'}/functions/v1/collaboration-agent-orchestrator`;
+    const orchestratorUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collaboration-agent-orchestrator`;
     
     try {
       // Client-driven iteration loop
@@ -672,7 +672,7 @@ export function ArtifactCollaborator({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ia3pka3NmYXl5Z25yemRxb2FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MTA4MzcsImV4cCI6MjA3ODk4NjgzN30.xOKphCiEilzPTo9EGHNJqAJfruM_bijI9PN3BQBF-z8'}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify(requestBody),
           signal: abortControllerRef.current.signal,

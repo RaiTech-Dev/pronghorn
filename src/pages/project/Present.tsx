@@ -295,7 +295,7 @@ export default function Present() {
     
     try {
       const response = await fetch(
-        `https://obkzdksfayygnrzdqoam.supabase.co/functions/v1/presentation-agent`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/presentation-agent`,
         {
           method: "POST",
           headers: {
@@ -517,7 +517,7 @@ export default function Present() {
     setIsRecasting(true);
     try {
       const response = await fetch(
-        "https://obkzdksfayygnrzdqoam.supabase.co/functions/v1/recast-slide-layout",
+        "${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recast-slide-layout",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

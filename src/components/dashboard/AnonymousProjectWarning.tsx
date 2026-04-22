@@ -26,7 +26,7 @@ export function AnonymousProjectWarning({
   projectId,
   shareToken,
 }: AnonymousProjectWarningProps) {
-  const shareUrl = `https://pronghorn.red/project/${projectId}/settings/t/${shareToken}`;
+  const shareUrl = `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/settings/t/${shareToken}`;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {

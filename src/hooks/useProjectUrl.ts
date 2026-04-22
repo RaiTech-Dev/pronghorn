@@ -38,7 +38,7 @@ export function useProjectUrl(projectId?: string) {
    * Get full URL string for external sharing (with domain and REAL token)
    * This is the URL users should copy to share with others
    */
-  const getShareUrl = (path: string, domain: string = "https://pronghorn.red"): string => {
+ const getShareUrl = (path: string, domain: string = import.meta.env.VITE_APP_URL ?? window.location.origin): string => {
     if (!projectId) return `${domain}${path}`;
     
     const basePath = `/project/${projectId}${path}`;

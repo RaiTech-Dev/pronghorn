@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email is required");
     }
 
-    const baseUrl = "https://pronghorn.red";
+    const baseUrl = Deno.env.get("APP_URL") ?? "https://pronghorn.red";
     let actionUrl: string;
     let subject: string;
     let heading: string;

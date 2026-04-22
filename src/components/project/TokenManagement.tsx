@@ -209,7 +209,7 @@ export function TokenManagement({ projectId, shareToken }: TokenManagementProps)
       broadcastRefresh();
       
       // Copy the new token URL to clipboard
-      const url = `https://pronghorn.red/project/${projectId}/requirements/t/${newToken}`;
+      const url = `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/requirements/t/${newToken}`;
       navigator.clipboard.writeText(url);
       toast.info("New token URL copied to clipboard");
       
@@ -222,7 +222,7 @@ export function TokenManagement({ projectId, shareToken }: TokenManagementProps)
   });
 
   const copyTokenUrl = (token: string) => {
-    const url = `https://pronghorn.red/project/${projectId}/requirements/t/${token}`;
+    const url = `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/requirements/t/${token}`;
     navigator.clipboard.writeText(url);
     toast.success("Token URL copied to clipboard");
   };
@@ -271,7 +271,7 @@ export function TokenManagement({ projectId, shareToken }: TokenManagementProps)
       toast.error("No access token available");
       return;
     }
-    const url = `https://pronghorn.red/project/${projectId}/settings/t/${displayToken}`;
+    const url = `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/settings/t/${displayToken}`;
     navigator.clipboard.writeText(url);
     toast.success("Access URL copied to clipboard");
   };
@@ -300,8 +300,8 @@ export function TokenManagement({ projectId, shareToken }: TokenManagementProps)
               <Input 
                 readOnly 
                 value={showMyToken 
-                  ? `https://pronghorn.red/project/${projectId}/settings/t/${displayToken}`
-                  : `https://pronghorn.red/project/${projectId}/settings/t/••••••••••••`
+                  ? `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/settings/t/${displayToken}`
+                  : `${import.meta.env.VITE_APP_URL ?? window.location.origin}/project/${projectId}/settings/t/••••••••••••`
                 }
                 className="font-mono text-xs"
               />
