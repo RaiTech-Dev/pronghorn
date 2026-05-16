@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv pronghorn *)",
+      "Bash(ls -d pronghorn*)"
+    ]
+  }
+}

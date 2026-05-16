@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       throw new Error("GitHub PAT not configured");
     }
 
-    const organization = "pronghorn-cloud";
+   const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud";
 
     // Create empty repository on GitHub
     const createRepoResponse = await fetch(`https://api.github.com/orgs/${organization}/repos`, {
