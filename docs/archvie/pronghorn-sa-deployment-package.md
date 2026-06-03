@@ -149,14 +149,9 @@ After provisioning, collect the following from your dashboard:
 2. Copy the key — it's only shown once
 
 **GitHub PAT (required — repository and build features)**
-1. GitHub → Settings → Developer Settings → Personal Access Tokens → **Tokens (classic)**
-2. Generate new token with these scopes:
-   - `repo` — full repository access (create, read, write, delete)
-   - `admin:org` — required to create repositories in a GitHub organisation
-   - `delete_repo` — required for the admin delete repo action
+1. GitHub → Settings → Developer Settings → Personal Access Tokens → Tokens (classic)
+2. Generate new token with scopes: `repo` (full), `read:org`
 3. Copy the token — shown once only
-
-> **Classic PAT required:** Fine-grained PATs return "You need admin access to the organization" when creating org repositories via the GitHub API, regardless of what permissions are configured. This is a GitHub API limitation — use Classic PAT only.
 
 ---
 
@@ -402,37 +397,6 @@ Update canonical URL, og:url, og:title, og:image, and equivalent Twitter card ta
 Change the three `<a href="https://pronghorn.red">` attribution links to your own domain if you want to rebrand the instance. MIT license permits this.
 
 ---
-
-
-### Change 28 — Edge Functions: GitHub Organisation Hardcoded (Critical — GitHub Integration)
-
-**Files:** `supabase/functions/create-empty-repo/index.ts` and any other function containing `pronghorn-cloud`
-
-**Find all affected files:**
-```bash
-grep -r "pronghorn-cloud" supabase/functions/
-```
-
-**The bug:** Multiple edge functions hardcode `"pronghorn-cloud"` (Alberta's GitHub org) directly in the function body. The `GITHUB_DOMAIN` secret is never read. Every repository operation targets Alberta's org and fails with a 500 error.
-
-**The fix — in each affected file:**
-```typescript
-// BEFORE (hardcoded — wrong):
-const organization = "pronghorn-cloud";
-
-// AFTER (reads from secret):
-const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud";
-```
-
-**Required Supabase secret:**
-```
-GITHUB_DOMAIN = rAI-solutions   # your exact GitHub org or username
-```
-
-**Redeploy after fixing:**
-```bash
-supabase functions deploy --project-ref YOUR_PROJECT_REF
-```
 
 ## 6. Phase 2 — New Files to Create
 
@@ -852,8 +816,7 @@ In Supabase Dashboard → Settings → Edge Functions → Manage Secrets:
 |-------------|-------------|
 | `GEMINI_API_KEY` | aistudio.google.com → API Keys |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys |
-| `GITHUB_PAT` | github.com → Settings → Developer Settings → Personal Access Tokens → **Tokens (classic)** |
-| `GITHUB_DOMAIN` | Your GitHub organisation name or personal username exactly as it appears on GitHub (case-sensitive, e.g. `rAI-solutions`) |
+| `GITHUB_PAT` | github.com → Settings → Developer Settings → Personal Access Tokens |
 
 **Optional secrets (unlock specific features):**
 
@@ -1178,10 +1141,7 @@ make supabase-push
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| GitHub repo creation fails with 500 / "admin access" error | `create-empty-repo` and related functions hardcode `pronghorn-cloud` as the GitHub org — `GITHUB_DOMAIN` secret is ignored | In each affected function, change: `const organization = "pronghorn-cloud"` → `const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud"`. Find all files: `grep -r "pronghorn-cloud" supabase/functions/`. Redeploy: `supabase functions deploy --project-ref YOUR_REF`. |
 | Signup email verification link points to pronghorn.red | `send-auth-email/index.ts` has hardcoded `pronghorn.red` as base URL | Fix `baseUrl` to use `Deno.env.get("APP_URL")`; add `APP_URL` secret; redeploy functions |
-| Tech Stacks / Standards / Build Books page shows empty | Seeded rows have `org_id = NULL` — UI filters by org. Also parent tech stacks need `type = NULL` not `type = 'stack'` | (1) Find correct org_id: create any item from UI, check its org_id. (2) `UPDATE tech_stacks SET org_id = '<id>' WHERE org_id IS NULL`. Repeat for standard_categories, standards, build_books, profiles. (3) `UPDATE tech_stacks SET type = NULL WHERE parent_id IS NULL` — UI queries `type=is.null` for top-level stacks. |
-| Profile row missing — org never loads | Profiles table empty after first login in some configs | `INSERT INTO profiles (id, user_id, org_id, email, display_name) SELECT gen_random_uuid(), id, '<org_id>', email, email FROM auth.users WHERE id = '<user_id>' ON CONFLICT DO NOTHING;` |
 | Signup fails with Resend error | `RESEND_API_KEY` not set as edge function secret | Add `RESEND_API_KEY` to edge function secrets, or use Method 1 (Dashboard user creation) to bypass Resend |
 | `npm ci can only install packages when package.json and package-lock.json are in sync` | Dockerfile uses `node:20-alpine` + `npm ci` but repo uses Bun | Switch to `oven/bun:1-alpine`, use `bun install`, `bun run build` |
 | `lockfile had changes, but lockfile is frozen` | `bun.lockb` has drifted out of sync with `package.json` | Remove `--frozen-lockfile` from Dockerfile (`RUN bun install`); run `npx bun install` locally and commit updated `bun.lockb` |
@@ -1210,8 +1170,7 @@ make supabase-push
 - [ ] `.env.local` has never been committed — verify with `git log --all -- .env.local` (should return nothing)
 - [ ] `VITE_ADMIN_KEY` is a strong unique password — not a default or dictionary word
 - [ ] Supabase anon key is stored only in `.env.local` — not hardcoded in any source file
-- [ ] GitHub PAT is a **Classic PAT** (not fine-grained) with `repo`, `admin:org`, `delete_repo` scopes
-- [ ] `GITHUB_DOMAIN` secret is set to your exact GitHub org/username
+- [ ] GitHub PAT has minimum necessary scopes (`repo` + `read:org` only)
 - [ ] Supabase RLS (Row Level Security) is active — all tables enforce RLS by default via migrations
 - [ ] Port 8080 is not exposed to the public internet (router firewall)
 - [ ] If adding HTTPS, port 443 is the only port exposed publicly — port 8080 remains LAN-only
@@ -1251,10 +1210,8 @@ make supabase-push
 | 25 | `nginx.conf` | New file | Container | **Yes** |
 | 26 | `docker-compose.yml` | New file | Container | **Yes** |
 | 27 | `Makefile` | New file | Operations | **Yes** |
-| 28 | `supabase/functions/create-empty-repo/index.ts` | Line ~83 | Bug fix | **Yes — GitHub integration** |
-| 29 | All functions containing `pronghorn-cloud` | Varies | Bug fix | **Yes — GitHub integration** |
 
-**Total required changes: 26+ files (20 code edits, 1 config edit, 5 new files)**  
+**Total required changes: 24 files (18 code edits, 1 config edit, 5 new files)**  
 **Total optional/cosmetic: 3 files**
 
 ---

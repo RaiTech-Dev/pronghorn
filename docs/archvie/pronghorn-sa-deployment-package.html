@@ -411,7 +411,6 @@
   <a href="#phase0">Phase 0 — API Keys</a>
   <a href="#phase1">Phase 1 — Code Changes</a>
   <a href="#phase2">Phase 2 — New Files</a>
-  <a href="#change28" style="color:#dc2626;font-weight:600;">Change 28 — GitHub Fix ⚠</a>
   <a href="#phase3">Phase 3 — Supabase + Azure AD</a>
   <a href="#phase4">Phase 4 — Build & Launch</a>
   <a href="#phase5">Phase 5 — Validation</a>
@@ -678,7 +677,7 @@
       <tr><td>File storage</td><td>Supabase Storage</td><td>Supabase cloud</td><td>Automatic on project create</td></tr>
       <tr><td>LLM — primary</td><td>Google Gemini</td><td>External API</td><td>Provide API key</td></tr>
       <tr><td>LLM — chat</td><td>Anthropic Claude</td><td>External API</td><td>Provide API key</td></tr>
-      <tr><td>Repo integration</td><td>GitHub Classic PAT + GITHUB_DOMAIN secret</td><td>External</td><td>Classic PAT with <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code>; GITHUB_DOMAIN = your org name</td></tr>
+      <tr><td>Repo integration</td><td>GitHub PAT</td><td>External</td><td>Provide PAT with repo scopes</td></tr>
     </table>
   </section>
 
@@ -731,7 +730,7 @@
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Clone the Pronghorn repo locally</span></li>
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Get Gemini API key from aistudio.google.com</span></li>
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Get Anthropic API key from console.anthropic.com</span></li>
-          <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Create GitHub <strong>Classic PAT</strong> with <code>repo</code> + <code>admin:org</code> + <code>delete_repo</code> scopes (Classic PAT required — fine-grained PATs cannot create org repositories via API)</span></li>
+          <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Create GitHub PAT with <code>repo</code> + <code>read:org</code> scopes</span></li>
         </ul>
       </div>
     </div>
@@ -774,7 +773,6 @@
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Create <code>nginx.conf</code> — SPA fallback, gzip_static, cache headers</span></li>
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Create <code>docker-compose.yml</code> — build args, port 8080:80, healthcheck</span></li>
           <li class="task" onclick="toggle(this)"><input type="checkbox"><span>Create <code>Makefile</code> — make targets for build, deploy, restart, prune, logs, shell, supabase</span></li>
-          <li class="task" onclick="toggle(this)" style="background:rgba(220,38,38,0.06)"><input type="checkbox"><span><strong>Change 28 (Critical)</strong> — Fix hardcoded <code>"pronghorn-cloud"</code> GitHub org in edge functions: run <code>grep -r "pronghorn-cloud" supabase/functions/</code>, change to <code>Deno.env.get("GITHUB_DOMAIN")</code> in each file, set <code>GITHUB_DOMAIN</code> secret, redeploy</span></li>
         </ul>
       </div>
     </div>
@@ -880,8 +878,7 @@
     <h3>External API keys</h3>
     <p><strong>Gemini:</strong> aistudio.google.com → Get API key. Also enable "Generative Language API" in your Google Cloud Console project.</p>
     <p><strong>Anthropic:</strong> console.anthropic.com → API Keys → Create key. Shown once only — copy immediately.</p>
-    <p><strong>GitHub PAT:</strong> GitHub → Settings → Developer Settings → Personal Access Tokens → <strong>Tokens (classic)</strong>. Required scopes: <code>repo</code> (full), <code>admin:org</code>, <code>delete_repo</code>.</p>
-    <div class="callout critical"><div class="callout-label">Classic PAT required — not fine-grained</div><p>Fine-grained PATs return "You need admin access to the organization" when creating repositories in a GitHub organisation via the API, regardless of what permissions are configured. This is a GitHub API limitation. Always use a Classic PAT for Pronghorn.</p></div>
+    <p><strong>GitHub PAT:</strong> GitHub → Settings → Developer Settings → Personal Access Tokens (Classic). Required scopes: <code>repo</code> (full), <code>read:org</code>.</p>
   </section>
 
   <!-- ══ PHASE 1 detail ══ -->
@@ -1175,52 +1172,6 @@ error: script "build" exited with code 1</pre>
       start_period: 15s</pre>
   </section>
 
-
-  <!-- ══ CHANGE 28 — GITHUB ORG HARDCODED ══ -->
-  <section id="change28">
-    <h2><span class="sec-num" style="background:#dc2626;">28</span>Change 28 — Edge Functions: GitHub Organisation Hardcoded</h2>
-    <div class="section-rule" style="background:#dc2626;"></div>
-
-    <div class="callout critical">
-      <div class="callout-label">Critical — blocks all GitHub repository creation</div>
-      <p>Multiple edge functions hardcode <code>"pronghorn-cloud"</code> (Alberta's GitHub organisation) directly in the function body. The <code>GITHUB_DOMAIN</code> environment secret is never read. Every repository creation attempt targets Alberta's org and fails with a 500 error regardless of what secrets are configured.</p>
-    </div>
-
-    <h3>Find all affected functions</h3>
-    <p>Run this from your Pronghorn repo root to identify every function with the hardcoded value:</p>
-    <pre>grep -r <span class="str">"pronghorn-cloud"</span> supabase/functions/</pre>
-    <p>Apply the fix below to every file returned.</p>
-
-    <h3>The fix — create-empty-repo/index.ts (and all others found above)</h3>
-    <p><strong>File:</strong> <code>supabase/functions/create-empty-repo/index.ts</code> &nbsp;·&nbsp; Line ~83 &nbsp;·&nbsp; Required</p>
-    <pre><span class="cm">// Before — hardcoded to Alberta's org, GITHUB_DOMAIN secret is ignored:</span>
-<span class="kw">const</span> organization = <span class="str">"pronghorn-cloud"</span>;
-
-<span class="cm">// After — reads from your GITHUB_DOMAIN secret:</span>
-<span class="kw">const</span> organization = Deno.env.get(<span class="str">"GITHUB_DOMAIN"</span>) ?? <span class="str">"pronghorn-cloud"</span>;</pre>
-
-    <h3>Required Supabase secret</h3>
-    <p>Set in Supabase Dashboard → Settings → Edge Functions → Manage Secrets:</p>
-    <pre>GITHUB_DOMAIN = rAI-solutions   <span class="cm"># your exact GitHub org or personal username (case-sensitive)</span></pre>
-
-    <h3>Redeploy after fixing</h3>
-    <pre><span class="cm"># Redeploy a single function:</span>
-npx supabase functions deploy create-empty-repo --project-ref YOUR_PROJECT_REF
-
-<span class="cm"># Or redeploy all functions at once:</span>
-npx supabase functions deploy --project-ref YOUR_PROJECT_REF</pre>
-
-    <h3>Why Classic PAT is required</h3>
-    <p>Even with the org fix applied, GitHub PAT must be a <strong>Classic PAT</strong> — not a fine-grained PAT. Fine-grained PATs return "You need admin access to the organization" when creating repositories in a GitHub org via the API, regardless of what permissions are configured on the token. This is a GitHub API limitation.</p>
-    <p>Create at: <code>github.com/settings/tokens/new</code> (Classic) with scopes: <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code></p>
-
-    <h3>Validate</h3>
-    <p>After applying the fix and setting the secrets, create a repository from a Pronghorn project. Check the edge function logs:</p>
-    <pre><span class="cm"># Supabase Dashboard → Edge Functions → create-empty-repo → Logs</span>
-<span class="cm"># Should show: "Created empty repository: rAI-solutions/your-repo-name"</span>
-<span class="cm"># Not: "Error: GitHub API error: You need admin access..."</span></pre>
-  </section>
-
   <!-- ══ PHASE 3 detail ══ -->
   <section id="phase3">
     <h2><span class="sec-num">07</span>Phase 3 — Supabase Configuration</h2>
@@ -1319,8 +1270,7 @@ verify_jwt = false</pre>
       <tr><th>Secret</th><th>Source</th></tr>
       <tr><td><code>GEMINI_API_KEY</code></td><td>aistudio.google.com → API Keys</td></tr>
       <tr><td><code>ANTHROPIC_API_KEY</code></td><td>console.anthropic.com → API Keys</td></tr>
-      <tr><td><code>GITHUB_PAT</code></td><td>github.com → Settings → Developer Settings → <strong>Tokens (classic)</strong> with <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code> scopes</td></tr>
-      <tr><td><code>GITHUB_DOMAIN</code></td><td>Your GitHub organisation name or personal username — exactly as it appears on GitHub, case-sensitive (e.g. <code>rAI-solutions</code>)</td></tr>
+      <tr><td><code>GITHUB_PAT</code></td><td>github.com → Settings → Developer Settings → PATs</td></tr>
     </table>
     <h4>Optional</h4>
     <table>
@@ -1472,9 +1422,6 @@ make prune-all    <span class="cm"># also removes volumes and orphaned container
     <div class="section-rule"></div>
     <table class="trouble">
       <tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr>
-      <tr style="background:rgba(220,38,38,0.06)"><td>GitHub repo creation fails with 500 / "You need admin access to the organization"</td><td><code>create-empty-repo</code> and related edge functions hardcode <code>"pronghorn-cloud"</code> as the GitHub org — the <code>GITHUB_DOMAIN</code> secret is completely ignored</td><td>In each affected function change: <code>const organization = "pronghorn-cloud"</code> → <code>const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud"</code>. Find all files: <code>grep -r "pronghorn-cloud" supabase/functions/</code>. Set <code>GITHUB_DOMAIN</code> secret. Redeploy: <code>supabase functions deploy --project-ref YOUR_REF</code></td></tr>
-      <tr style="background:rgba(220,38,38,0.04)"><td>GitHub API returns "admin access" error even after setting all permissions on fine-grained PAT</td><td>GitHub API limitation — fine-grained PATs cannot create org repositories regardless of permissions configured</td><td>Replace with a <strong>Classic PAT</strong> at github.com/settings/tokens/new with <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code> scopes. Update <code>GITHUB_PAT</code> secret and redeploy.</td></tr>
-      <tr style="background:rgba(220,38,38,0.03)"><td>Tech Stacks / Standards / Build Books page shows empty despite data being in database</td><td>Two causes: (1) seeded rows have <code>org_id = NULL</code> — UI filters by org; (2) parent tech stacks have <code>type = 'stack'</code> but UI queries <code>type=is.null</code></td><td>(1) Find correct org_id by creating any item from UI, checking its org_id. Then: <code>UPDATE tech_stacks SET org_id = '&lt;id&gt;' WHERE org_id IS NULL</code> — repeat for standard_categories, standards, build_books, profiles. (2) <code>UPDATE tech_stacks SET type = NULL WHERE parent_id IS NULL AND name LIKE 'Rai-Tech%'</code></td></tr>
       <tr><td><code>npm ci can only install packages when package.json and package-lock.json are in sync</code></td><td>Dockerfile uses <code>node:20-alpine</code> + <code>npm ci</code> but repo uses Bun — <code>package-lock.json</code> is not maintained</td><td>Switch to <code>oven/bun:1-alpine</code>, use <code>bun install</code>, use <code>bun run build</code></td></tr>
       <tr><td><code>lockfile had changes, but lockfile is frozen</code></td><td><code>bun.lockb</code> has drifted out of sync with <code>package.json</code> — Lovable never kept them in sync</td><td>Remove <code>--frozen-lockfile</code> from Dockerfile (<code>RUN bun install</code>); run <code>npx bun install</code> locally and commit updated <code>bun.lockb</code></td></tr>
       <tr><td><code>Error at parseAsync (unknown)</code> / Rollup crash during build</td><td>Bun pulled Rollup <code>4.60.x</code> inside Alpine; codebase requires <code>4.24.0</code></td><td>Add <code>"overrides": &#123; "rollup": "4.24.0" &#125;</code> to <code>package.json</code>, run <code>npx bun install</code>, rebuild with <code>--no-cache</code></td></tr>
@@ -1506,8 +1453,7 @@ make prune-all    <span class="cm"># also removes volumes and orphaned container
       <li onclick="toggleSec(this)"><input type="checkbox"><span><code>.env.local</code> has never been committed — verify with <code>git log --all -- .env.local</code> (should return nothing)</span></li>
       <li onclick="toggleSec(this)"><input type="checkbox"><span><code>VITE_ADMIN_KEY</code> is a strong unique password — not a default or dictionary word</span></li>
       <li onclick="toggleSec(this)"><input type="checkbox"><span>Supabase anon key is only in <code>.env.local</code> — not hardcoded in any source file</span></li>
-      <li onclick="toggleSec(this)"><input type="checkbox"><span>GitHub PAT is a <strong>Classic PAT</strong> (not fine-grained) with <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code> scopes</span></li>
-      <li onclick="toggleSec(this)"><input type="checkbox"><span><code>GITHUB_DOMAIN</code> secret is set to your exact GitHub org/username</span></li>
+      <li onclick="toggleSec(this)"><input type="checkbox"><span>GitHub PAT has minimum scopes only (<code>repo</code> + <code>read:org</code>)</span></li>
       <li onclick="toggleSec(this)"><input type="checkbox"><span>Supabase RLS is active — all tables enforce Row Level Security via migrations</span></li>
       <li onclick="toggleSec(this)"><input type="checkbox"><span>Port 8080 is not exposed to the public internet (router firewall)</span></li>
       <li onclick="toggleSec(this)"><input type="checkbox"><span>LLM API keys are set as Supabase secrets only — not in frontend code</span></li>
@@ -1548,10 +1494,8 @@ make prune-all    <span class="cm"># also removes volumes and orphaned container
       <tr><td>25</td><td><code>nginx.conf</code></td><td>New file</td><td>Container</td><td><span class="badge badge-yes">Yes</span></td></tr>
       <tr><td>26</td><td><code>docker-compose.yml</code></td><td>New file</td><td>Container</td><td><span class="badge badge-yes">Yes</span></td></tr>
       <tr><td>27</td><td><code>Makefile</code></td><td>New file</td><td>Operations</td><td><span class="badge badge-yes">Yes</span></td></tr>
-      <tr style="background:rgba(220,38,38,0.06)"><td>28</td><td><code>supabase/functions/create-empty-repo/index.ts</code></td><td>Line ~83</td><td>Bug fix — GitHub integration</td><td><span class="badge badge-yes">Yes</span></td></tr>
-      <tr style="background:rgba(220,38,38,0.04)"><td>29</td><td>All functions containing <code>pronghorn-cloud</code> (run grep to find)</td><td>Varies</td><td>Bug fix — GitHub integration</td><td><span class="badge badge-yes">Yes</span></td></tr>
     </table>
-    <p style="margin-top:16px;"><strong>26+ required changes</strong> (20 code edits, 1 config edit, 5 new files) &nbsp;·&nbsp; <strong>3 optional/cosmetic</strong></p>
+    <p style="margin-top:16px;"><strong>24 required changes</strong> (18 code edits, 1 config edit, 5 new files) &nbsp;·&nbsp; <strong>3 optional/cosmetic</strong></p>
   </section>
 
   <!-- ══ USER SETUP ══ -->
@@ -1656,8 +1600,7 @@ DELETE FROM user_roles WHERE user_id = <span class="str">'&lt;user-uuid&gt;'</sp
       <tr><td><code>APP_URL</code></td><td>Email verification links (after code fix)</td><td><code>http://YOUR_IP:8080</code></td></tr>
       <tr><td><code>ANTHROPIC_API_KEY</code></td><td>AI chat (chat-stream-anthropic)</td><td>From Anthropic console</td></tr>
       <tr><td><code>GEMINI_API_KEY</code></td><td>Primary LLM for all AI features</td><td>From Google AI Studio</td></tr>
-      <tr><td><code>GITHUB_PAT</code></td><td>Repository and build features</td><td>Classic GitHub PAT with <code>repo</code>, <code>admin:org</code>, <code>delete_repo</code> scopes</td></tr>
-      <tr><td><code>GITHUB_DOMAIN</code></td><td>Repository and build features</td><td>Your GitHub org/username exactly as on GitHub (e.g. <code>rAI-solutions</code>). Required — edge functions ignore this secret if not set and hardcode <code>pronghorn-cloud</code>.</td></tr>
+      <tr><td><code>GITHUB_PAT</code></td><td>Repository and build features</td><td>GitHub PAT with repo + read:org scopes</td></tr>
     </table>
 
     <div class="callout">

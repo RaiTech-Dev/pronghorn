@@ -22,9 +22,21 @@ interface CanvasNodeType {
 
 // Dynamic helper functions
 function buildXPositions(nodeTypes: CanvasNodeType[]): Record<string, number> {
+  // Manual overrides for types that share the same order_score
+  const MANUAL_OVERRIDES: Record<string, number> = {
+    NOTES: 50,
+    ZONE: 50,
+    LABEL: 50,
+    PROJECT: 150,
+    REQUIREMENT: 300,
+    STANDARD: 450,
+    SECURITY: 600,
+    TECH_STACK: 750,
+  };
+
   const result: Record<string, number> = {};
   nodeTypes.forEach(nt => {
-    result[nt.system_name] = nt.order_score + Math.floor(nt.order_score * 0.5);
+    result[nt.system_name] = MANUAL_OVERRIDES[nt.system_name] ?? nt.order_score * 3;
   });
   return result;
 }
@@ -65,8 +77,7 @@ function buildPositioningPrompt(nodeTypes: CanvasNodeType[]): string {
       prompt += `  * ${data.types.join(', ')}: x=${data.xPos}\n`;
     });
   
-  prompt += '- Y-axis (vertical): Layer by function, most public at top (y=50), most private at bottom (y=600+)\n';
-  prompt += '- Spacing: 150px vertically between nodes of the same type\n';
+  prompt += '- Do NOT set x or y values — positioning is handled automatically.\n';
   
   return prompt;
 }
@@ -154,10 +165,10 @@ serve(async (req) => {
     // Build dynamic X_POSITIONS from database
     const X_POSITIONS = buildXPositions(nodeTypes);
     
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const GOOGLE_AI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY');
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!GOOGLE_AI_API_KEY) {
+      throw new Error('GOOGLE_AI_API_KEY not configured');
     }
 
     console.log('Generating architecture for:', description);
@@ -175,7 +186,7 @@ ${nodeTypePrompt}
 
 ${flowHierarchyPrompt}
 
-${drawEdges ? `EDGES: Define connections between nodes. All edges must flow LEFT to RIGHT (lower level to higher level).
+${drawEdges ? `EDGES: Be selective. Maximum 2-3 edges per node. Do NOT connect the root project node to every component — only connect it to top-level entry points (pages, main services). Avoid redundant or transitive connections. All edges must flow LEFT to RIGHT (lower level to higher level). CRITICAL: The source and target fields in every edge must be character-for-character identical to the label field of the corresponding node. Copy the label exactly — same capitalization, same spacing, same punctuation.
 Valid connection patterns:
 - PROJECT → PAGE, TECH_STACK, REQUIREMENT, STANDARD
 - PAGE → WEB_COMPONENT
@@ -285,20 +296,20 @@ Use clear, descriptive names. Be specific about what each component does.`;
 
     const userPrompt = `Generate a complete application architecture for: ${description}${existingContextInfo}`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: enrichedSystemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-      }),
+    const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${Deno.env.get('GOOGLE_AI_API_KEY')}`,
+  {
+        method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: enrichedSystemPrompt }] },
+      contents: [
+        { role: 'user', parts: [{ text: userPrompt }] }
+      ],
+      generationConfig: { temperature: 0.7 },
+    }),
     });
 
     if (!response.ok) {
@@ -308,7 +319,7 @@ Use clear, descriptive names. Be specific about what each component does.`;
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content;
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     
     console.log('AI response:', content);
 
@@ -323,13 +334,45 @@ Use clear, descriptive names. Be specific about what each component does.`;
       architecture = JSON.parse(content);
     }
 
-    // Post-process nodes to ensure correct X positions using dynamic lookup
-    if (architecture.nodes) {
-      architecture.nodes = architecture.nodes.map((node: any) => ({
-        ...node,
-        x: X_POSITIONS[node.type] ?? node.x ?? 700,
-      }));
-    }
+  // Post-process nodes: assign IDs and fix X positions
+if (architecture.nodes) {
+  const nodeMap = new Map<string, string>();
+  const typeYCounters: Record<string, number> = {};
+  const Y_START = 100;
+  const Y_SPACING = 150;
+
+  architecture.nodes = architecture.nodes.map((node: any, index: number) => {
+    const id = `node-${index}-${node.label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+    nodeMap.set(node.label, id);
+
+    const x = X_POSITIONS[node.type] ?? 700;
+    const yIndex = typeYCounters[node.type] ?? 0;
+    typeYCounters[node.type] = yIndex + 1;
+    const y = Y_START + yIndex * Y_SPACING;
+
+    return { ...node, id, x, y };
+  });
+
+  // Rewrite edges to use resolved IDs, drop any that can't be matched
+if (architecture.edges) {
+  architecture.edges = architecture.edges
+    .map((edge: any) => {
+      const sourceId = nodeMap.get(edge.source);
+      const targetId = nodeMap.get(edge.target);
+       if (!sourceId || !targetId) {
+        console.warn(`[ai-architect] Unresolved edge: "${edge.source}" → "${edge.target}"`);
+        console.warn(`[ai-architect] Available labels:`, Array.from(nodeMap.keys()));
+        return null;
+      }
+      return {
+        ...edge,
+        source: sourceId,  // overwrite with resolved ID
+        target: targetId,  // overwrite with resolved ID
+      };
+    })
+    .filter(Boolean);
+}
+}
 
     console.log('Parsed architecture:', architecture);
 

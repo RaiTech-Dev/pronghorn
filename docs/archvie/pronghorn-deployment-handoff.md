@@ -346,7 +346,6 @@ VALUES ('.NET 9', 'Framework', '<backend-id>', '<org-id>',
 
 | Item | Status | Notes |
 |------|--------|-------|
-| `create-empty-repo` + all repo functions hardcode `pronghorn-cloud` org | **Fixed — apply to each function** | Change `const organization = "pronghorn-cloud"` to `const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud"`. Run `grep -r "pronghorn-cloud" supabase/functions/` to find all affected files. Set `GITHUB_DOMAIN` secret in Supabase. |
 | `send-auth-email` hardcoded `pronghorn.red` | Pending | Change `baseUrl` to read `APP_URL` env secret. Affects email verification links. |
 | `ANTHROPIC_API_KEY` | Set in Supabase secrets | Required for `chat-stream-anthropic` edge function |
 | `RESEND_API_KEY` | Optional | Only needed for email/password self-registration flow |
@@ -364,9 +363,6 @@ VALUES ('.NET 9', 'Framework', '<backend-id>', '<org-id>',
 | 403 on edge function calls | Wrong or missing anon key | Check `VITE_SUPABASE_PUBLISHABLE_KEY` — must be anon key, not service role |
 | Old Alberta project ID in JS | Hardcoded URL missed | Grep for `obkzdksfayygnrzdqoam` — replace all with `VITE_SUPABASE_URL` env var |
 | `cannot change return type` migration error | Existing function signature conflict | Drop the function in SQL Editor, re-run `db push` |
-| GitHub repo creation fails: "You need admin access" | `create-empty-repo` has `pronghorn-cloud` hardcoded — ignores `GITHUB_DOMAIN` secret | Change line: `const organization = Deno.env.get("GITHUB_DOMAIN") ?? "pronghorn-cloud"`. Redeploy function. Also check all other repo functions. |
-| GitHub Classic PAT required | Fine-grained PAT returns admin error even with Administration: R/W set | Use Classic PAT at github.com/settings/tokens/new with `repo`, `admin:org`, `delete_repo` scopes. GitHub API limitation for org repo creation. |
-| Tech Stacks/Standards/Build Books empty in UI | `org_id` NULL on seeded rows | Find correct org_id from any UI-created item, then UPDATE all seeded tables. Also check `type=NULL` on parent tech stacks (UI filters `type=is.null`). |
 | Azure login → Unable to exchange external code | Wrong client secret | Regenerate secret in Azure, copy Value column, re-enter in Supabase |
 | Azure login → redirects to localhost | `VITE_APP_URL` wrong | Set to actual IP with no trailing slash, rebuild Docker image |
 | Azure login → double slash `//dashboard` | Trailing slash in `VITE_APP_URL` | Remove trailing slash from `VITE_APP_URL`, rebuild |
