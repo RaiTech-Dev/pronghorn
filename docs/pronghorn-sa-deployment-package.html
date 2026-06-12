@@ -15,12 +15,13 @@
     --text: #e8eaf0;
     --text2: #9ba3b2;
     --text3: #5c6470;
-    --accent: #3dd68c;
-    --accent2: #1a7a4a;
-    --blue: #4a9eff;
-    --amber: #f0a500;
-    --red: #f05050;
-    --purple: #a78bfa;
+    /* Rai-Tech brand palette — derived from the logo gradients */
+    --accent: #ea4d1e;     /* brand orange (logo wordmark TRECHASE) */
+    --accent2: #a23708;    /* deep burn — hover/border on orange surfaces */
+    --blue: #52b7e2;       /* logo teal-blue gradient stop */
+    --amber: #f8a727;      /* logo warm-gold gradient stop */
+    --red: #dc2626;        /* warnings — distinct from brand orange */
+    --purple: #36a959;     /* logo green-teal gradient stop (repurposed) */
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'IBM Plex Sans', sans-serif;
   }
@@ -65,6 +66,20 @@
     margin-bottom: 16px;
   }
   nav .logo span { color: var(--text3); display: block; margin-top: 3px; font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 10px; }
+  nav .brand { display: block; padding: 0 20px 18px; }
+  nav .brand svg { width: 100%; height: auto; max-height: 64px; display: block; }
+  nav .project-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  nav .project-title span { color: var(--text3); display: block; margin-top: 4px; font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 10px; }
 
   nav a {
     display: block;
@@ -402,7 +417,68 @@
 
 <!-- ── Sidebar Nav ── -->
 <nav>
-  <div class="logo">Pronghorn<span>SA Deployment Package</span></div>
+  <div class="brand" aria-label="Rai-Tech">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="100 350 820 460" role="img" aria-label="Rai-Tech">
+      <defs>
+        <linearGradient id="rtOrange1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-50.223549 -120.41854 -120.41854 50.223549 217.00439 212.31396)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(252,217,114);stop-opacity:1"/>
+          <stop offset="27.0332%" style="stop-color:rgb(248,167,39);stop-opacity:1"/>
+          <stop offset="47.4258%" style="stop-color:rgb(246,133,20);stop-opacity:1"/>
+          <stop offset="70.1719%" style="stop-color:rgb(242,96,27);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(225,56,34);stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="rtOrange2" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-50.231121 -120.4367 -120.4367 50.231121 207.89355 216.11279)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(252,217,114);stop-opacity:1"/>
+          <stop offset="27.0332%" style="stop-color:rgb(248,167,39);stop-opacity:1"/>
+          <stop offset="47.4258%" style="stop-color:rgb(246,133,20);stop-opacity:1"/>
+          <stop offset="70.1719%" style="stop-color:rgb(242,96,27);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(225,56,34);stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="rtOrange3" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-50.222176 -120.41525 -120.41525 50.222176 195.03174 221.47461)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(252,217,114);stop-opacity:1"/>
+          <stop offset="27.0332%" style="stop-color:rgb(248,167,39);stop-opacity:1"/>
+          <stop offset="47.4258%" style="stop-color:rgb(246,133,20);stop-opacity:1"/>
+          <stop offset="70.1719%" style="stop-color:rgb(242,96,27);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(225,56,34);stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="rtOrange4" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-50.210628 -120.38756 -120.38756 50.210628 213.74902 213.65918)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(252,217,114);stop-opacity:1"/>
+          <stop offset="27.0332%" style="stop-color:rgb(248,167,39);stop-opacity:1"/>
+          <stop offset="47.4258%" style="stop-color:rgb(246,133,20);stop-opacity:1"/>
+          <stop offset="70.1719%" style="stop-color:rgb(242,96,27);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(225,56,34);stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="rtOrange5" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-46.86042 -112.35493 -112.35493 46.86042 196.53076 219.19775)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(252,217,114);stop-opacity:1"/>
+          <stop offset="27.0332%" style="stop-color:rgb(248,167,39);stop-opacity:1"/>
+          <stop offset="47.4258%" style="stop-color:rgb(246,133,20);stop-opacity:1"/>
+          <stop offset="70.1719%" style="stop-color:rgb(242,96,27);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(225,56,34);stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="rtTeal" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-23.241713 -49.4216 -49.4216 23.241713 148.70898 169.4375)" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" style="stop-color:rgb(54,169,89);stop-opacity:1"/>
+          <stop offset="33.6738%" style="stop-color:rgb(59,174,135);stop-opacity:1"/>
+          <stop offset="66.0605%" style="stop-color:rgb(82,183,226);stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:rgb(160,222,242);stop-opacity:1"/>
+        </linearGradient>
+      </defs>
+      <g transform="matrix(1.57 0 0 1.57 512 412.58)">
+        <g transform="matrix(2.4 0 0 -2.4 71.77 -3.52)"><path fill="url(#rtOrange1)" transform="translate(-192.6,-153.79)" d="m 191.77 155.821 l -1.803 -4.06 h 3.454 l 1.802 4.06 z"/></g>
+        <g transform="matrix(2.4 0 0 -2.4 86.56 -100.54)"><path fill="url(#rtOrange2)" transform="translate(-198.76,-194.2)" d="m 198.05 195.323 l -0.995 -2.242 h 2.406 l 0.996 2.242 z"/></g>
+        <g transform="matrix(2.4 0 0 -2.4 47.28 -93.27)"><path fill="url(#rtOrange3)" transform="translate(-182.39,-191.17)" d="m 181.217 193.047 l -1.666 -3.747 h 4.02 l 1.665 3.747 z"/></g>
+        <g transform="matrix(2.4 0 0 -2.4 88.79 -66.3)"><path fill="url(#rtOrange4)" transform="translate(-199.68,-179.94)" d="m 200.533 186.727 l -6.034 -13.578 h 4.334 l 6.037 13.578 z"/></g>
+        <g transform="matrix(2.4 0 0 -2.4 21 0)"><path fill="url(#rtOrange5)" transform="translate(-171.45,-152.32)" d="m 190.008 197.141 l -5.306 -11.936 h -4.303 l -6.002 -13.496 h 4.302 c 0 0 -2.604 -5.865 -2.601 -5.865 v 0 h -1.996 l -3.163 -7.122 h 1.992 l -5.202 -11.702 l -10.369 23.332 l -8.781 -19.758 l 19.15 -43.088 l 17.291 38.902 h -2.749 l 5.085 11.441 h 2.75 l 2.85 6.414 h -5.607 l 6.967 15.672 h -7.647 l 7.647 17.206 z m -8.704 -17.204 h 2.407 l -0.997 -2.24 h -2.405 z m -5.178 -36.204 h 3.425 l -1.419 -3.191 h -3.426 z"/></g>
+        <g transform="matrix(2.4 0 0 -2.4 -67.57 8.75)"><path fill="url(#rtTeal)" transform="translate(-134.56,-148.68)" d="m 120.533 127.004 h 17.561 l 10.485 23.59 l -8.781 19.758 z"/></g>
+      </g>
+      <g transform="matrix(1.57 0 0 1.57 511.83 660.54)">
+        <path fill="#e8eaf0" transform="translate(-167.78,20.05)" d="M 14.17 0 L 4.49 0 L 4.49 -40.13 L 23.88 -40.13 Q 30.02 -40.13 34.09 -35.85 Q 38.17 -31.57 38.17 -25.06 L 38.17 -25.06 Q 38.17 -20.77 36.24 -17.31 Q 34.31 -13.86 31.03 -12.1 L 31.03 -12.1 L 39.29 0 L 27.25 0 L 21.23 -9.97 L 14.17 -9.97 L 14.17 0 Z M 14.17 -31.14 L 14.17 -18.93 L 22.47 -18.93 Q 24.95 -18.93 26.69 -20.73 Q 28.43 -22.53 28.43 -25.06 L 28.43 -25.06 Q 28.43 -27.54 26.71 -29.34 Q 24.98 -31.14 22.53 -31.14 L 22.53 -31.14 L 14.17 -31.14 Z M 54.07 0 L 43.82 0 L 60.99 -40.13 L 71.76 -40.13 L 88.99 0 L 78.68 0 L 76.08 -6.25 L 56.72 -6.25 L 54.07 0 Z M 66.46 -29.15 L 60.09 -14.17 L 72.71 -14.17 L 66.46 -29.15 Z M 105.24 0 L 95.56 0 L 95.56 -40.13 L 105.24 -40.13 L 105.24 0 Z M 148.22 -15.64 L 126.44 -15.64 L 126.44 -24.6 L 148.22 -24.6 L 148.22 -15.64 Z M 181.29 -31.14 L 167.09 -31.14 L 167.09 -40.13 L 205.32 -40.13 L 205.32 -31.14 L 191.09 -31.14 L 191.09 0 L 181.29 0 L 181.29 -31.14 Z M 242.65 0 L 211.92 0 L 211.92 -40.13 L 242.65 -40.13 L 242.65 -31.14 L 221.6 -31.14 L 221.6 -24.26 L 239.17 -24.26 L 239.17 -15.87 L 221.6 -15.87 L 221.6 -8.96 L 242.65 -8.96 L 242.65 0 Z M 247.06 -20.37 Q 247.06 -24.52 248.7 -28.26 Q 250.35 -32.01 253.2 -34.77 Q 256.05 -37.54 260.11 -39.18 Q 264.17 -40.82 268.78 -40.82 Q 275.06 -40.82 279.98 -38.13 Q 284.89 -35.43 287.65 -30.8 L 279.44 -26.01 Q 277.97 -28.84 275.24 -30.47 Q 272.5 -32.09 268.78 -32.09 Q 263.57 -32.09 260.21 -28.74 Q 256.86 -25.38 256.86 -20.37 Q 256.86 -17.2 258.36 -14.46 Q 259.85 -11.73 262.6 -10.05 Q 265.36 -8.38 268.78 -8.38 Q 272.36 -8.38 275.08 -10.03 Q 277.8 -11.67 279.33 -14.46 L 287.54 -9.74 Q 284.72 -5.01 279.82 -2.15 Q 274.92 0.72 268.78 0.72 Q 264.15 0.72 260.1 -0.92 Q 256.05 -2.56 253.2 -5.37 Q 250.35 -8.18 248.7 -12.07 Q 247.06 -15.96 247.06 -20.37 Z M 303.7 0 L 294.02 0 L 294.02 -40.13 L 303.7 -40.13 L 303.7 -24.54 L 321.33 -24.54 L 321.33 -40.13 L 331.07 -40.13 L 331.07 0 L 321.33 0 L 321.33 -15.59 L 303.7 -15.59 L 303.7 0 Z"/>
+      </g>
+      <g transform="matrix(1.57 0 0 1.57 511.91 748.13)">
+        <path fill="rgb(234,77,30)" transform="translate(-179.07,12.91)" d="M 10.52 -20.06 L 1.37 -20.06 L 1.37 -25.85 L 26 -25.85 L 26 -20.06 L 16.83 -20.06 L 16.83 0 L 10.52 0 L 10.52 -20.06 Z M 50.04 0 L 30.24 0 L 30.24 -25.85 L 50.04 -25.85 L 50.04 -20.06 L 36.48 -20.06 L 36.48 -15.62 L 47.8 -15.62 L 47.8 -10.22 L 36.48 -10.22 L 36.48 -5.77 L 50.04 -5.77 L 50.04 0 Z M 52.88 -13.12 Q 52.88 -15.79 53.94 -18.2 Q 55 -20.61 56.83 -22.4 Q 58.67 -24.18 61.29 -25.23 Q 63.9 -26.29 66.87 -26.29 Q 70.92 -26.29 74.08 -24.56 Q 77.24 -22.82 79.02 -19.83 L 73.74 -16.75 Q 72.79 -18.57 71.03 -19.62 Q 69.26 -20.67 66.87 -20.67 Q 63.51 -20.67 61.35 -18.51 Q 59.19 -16.35 59.19 -13.12 Q 59.19 -11.08 60.15 -9.31 Q 61.12 -7.55 62.89 -6.48 Q 64.66 -5.4 66.87 -5.4 Q 69.17 -5.4 70.93 -6.46 Q 72.68 -7.51 73.66 -9.31 L 78.95 -6.27 Q 77.13 -3.23 73.98 -1.38 Q 70.82 0.46 66.87 0.46 Q 63.88 0.46 61.28 -0.59 Q 58.67 -1.65 56.83 -3.46 Q 55 -5.27 53.94 -7.77 Q 52.88 -10.28 52.88 -13.12 Z M 89.36 0 L 83.13 0 L 83.13 -25.85 L 89.36 -25.85 L 89.36 -15.81 L 100.71 -15.81 L 100.71 -25.85 L 106.99 -25.85 L 106.99 0 L 100.71 0 L 100.71 -10.04 L 89.36 -10.04 L 89.36 0 Z M 127.99 0 L 121.76 0 L 121.76 -25.85 L 128.66 -25.85 L 137.68 -6.88 L 146.64 -25.85 L 153.6 -25.85 L 153.6 0 L 147.32 0 L 147.32 -13.19 L 141.13 0 L 134.17 0 L 127.99 -13.19 L 127.99 0 Z M 164.41 0 L 157.81 0 L 168.87 -25.85 L 175.81 -25.85 L 186.9 0 L 180.26 0 L 178.59 -4.03 L 166.12 -4.03 L 164.41 0 Z M 172.39 -18.78 L 168.29 -9.13 L 176.42 -9.13 L 172.39 -18.78 Z M 202.56 0 L 191.13 0 L 191.13 -25.81 L 202.56 -25.85 Q 202.62 -25.85 202.67 -25.85 Q 205.73 -25.87 208.28 -24.9 Q 210.86 -23.94 212.58 -22.21 Q 214.31 -20.48 215.25 -18.11 Q 216.2 -15.73 216.2 -12.95 Q 216.2 -9.22 214.48 -6.27 Q 212.77 -3.32 209.65 -1.66 Q 206.53 0 202.56 0 Z M 197.37 -20.06 L 197.37 -5.77 L 202.56 -5.77 Q 205.83 -5.77 207.86 -7.75 Q 209.89 -9.72 209.89 -12.95 Q 209.89 -16.37 207.91 -18.21 Q 205.94 -20.06 202.56 -20.06 L 202.56 -20.06 L 197.37 -20.06 Z M 240 0 L 220.21 0 L 220.21 -25.85 L 240 -25.85 L 240 -20.06 L 226.44 -20.06 L 226.44 -15.62 L 237.76 -15.62 L 237.76 -10.22 L 226.44 -10.22 L 226.44 -5.77 L 240 -5.77 L 240 0 Z"/>
+      </g>
+    </svg>
+  </div>
+  <div class="project-title">Pronghorn<span>SA Deployment Package</span></div>
   <div class="nav-section">Overview</div>
   <a href="#architecture">1. Architecture</a>
   <a href="#components">2. Components</a>
